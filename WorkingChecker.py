@@ -30,3 +30,10 @@ if diff:
         print(part_num)
 else:
     print('The part numbers in Syspro match those in B.O.M.')
+
+    # Print the list of missing parts
+    missing_parts = set(col2) - set(col1)
+    if missing_parts:
+        print('\n\nThe following part numbers are in the B.O.M but not in Syspro:')
+        for part_num in missing_parts:
+            print(part_num)
