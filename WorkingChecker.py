@@ -28,7 +28,7 @@ if diff:
     print('The following part numbers are in Syspro but not in the B.O.M:')
     for part_num in diff:
         print(part_num)
-else:
+if diff:
     print('The part numbers in Syspro match those in B.O.M.')
 
     # Print the list of missing parts
