@@ -2,6 +2,7 @@ import pandas as pd
 import string
 from tkinter import Tk
 from tkinter.filedialog import askopenfilename
+import PySimpleGUI as sg
 
 # Ask the user to select the first Excel file
 Tk().withdraw()  # hide the Tkinter root window
@@ -37,3 +38,27 @@ if diff:
         print('\n\nThe following part numbers are in the B.O.M but not in Syspro:')
         for part_num in missing_parts:
             print(part_num)
+
+import PySimpleGUI as sg
+
+#GUI SETUP
+#Theme
+sg.theme("Dark2")
+#inside window
+layout = [
+    [sg.Text("Welcome to the B.O.M Sniffer")],
+    [sg.Text("Enter Syspro File"), sg.Button("Sniff File")],
+    [sg.Text("Enter B.O.M File"), sg.Button("Sniff File")]
+]
+
+#Make the window
+window = sg.Window("B.O.M Sniffer", layout)
+
+#event loop to process "events' and get the 'Values" of the inputs
+while True:
+    event, values = window.read()
+    if event == sg.WIN_CLOSED or event == "Cancel":
+        break
+
+
+
