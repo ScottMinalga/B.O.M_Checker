@@ -17,7 +17,7 @@ sheet1 = pd.read_excel(file1, skiprows=5)
 sheet2 = pd.read_excel(file2)
 
 # Extract the column containing the part numbers from each sheet
-col1 = sheet1['Part Number'].apply(lambda x: x.translate(str.maketrans('', '', string.punctuation)))
+col1 = sheet1['Stock Code'].apply(lambda x: x.translate(str.maketrans('', '', string.punctuation)))
 col2 = sheet2['Part Number'].apply(lambda x: x.translate(str.maketrans('', '', string.punctuation)))
 
 # Compare the two columns to identify any differences
