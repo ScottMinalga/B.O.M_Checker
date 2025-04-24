@@ -3,37 +3,58 @@ import string
 from tkinter import Tk
 from tkinter.filedialog import askopenfilename
 
-# Ask the user to select the first Excel file
-Tk().withdraw()  # hide the Tkinter root window
-file1 = askopenfilename(title='Select the first Excel file',
-                        filetypes=[('Excel Files', '*.xlsx')])
+# Hide the root Tkinter window
+Tk().withdraw()
 
-# Ask the user to select the second Excel file
-file2 = askopenfilename(title='Select the second Excel file',
-                        filetypes=[('Excel Files', '*.xlsx')])
+# Ask user to select both Excel files
+file1 = askopenfilename(title='Select the first Excel file', filetypes=[('Excel Files', '*.xlsx')])
+file2 = askopenfilename(title='Select the second Excel file', filetypes=[('Excel Files', '*.xlsx')])
 
-# Read in the two Excel sheets
+# Read Excel files, skipping header rows
 sheet1 = pd.read_excel(file1, skiprows=5)
-sheet2 = pd.read_excel(file2)
+sheet2 = pd.read_excel(file2, skiprows=5)
 
-# Extract the column containing the part numbers from each sheet
-col1 = sheet1['Part Number'].apply(lambda x: x.translate(str.maketrans('', '', string.punctuation)))
-col2 = sheet2['Part Number'].apply(lambda x: x.translate(str.maketrans('', '', string.punctuation)))
+# Clean and extract 'Stock code' and 'Quantity per' columns
+col1 = sheet1['Stock code'].apply(lambda x: str(x).translate(str.maketrans('', '', string.punctuation)).lower())
+col2 = sheet2['Stock code'].apply(lambda x: str(x).translate(str.maketrans('', '', string.punctuation)).lower())
 
-# Compare the two columns to identify any differences
-diff = set(col1) - set(col2)
+# Compare part numbers
+diff1 = set(col1) - set(col2)
+diff2 = set(col2) - set(col1)
 
-# Output the results
-if diff:
-    print('The following part numbers are in Syspro but not in the B.O.M:')
-    for part_num in diff:
-        print(part_num)
-if diff:
-    print('The part numbers in Syspro match those in B.O.M.')
+# Find parts with mismatched quantities
+qty_mismatches = []
+common_parts = set(col1) & set(col2)
 
-    # Print the list of missing parts
-    missing_parts = set(col2) - set(col1)
-    if missing_parts:
-        print('\n\nThe following part numbers are in the B.O.M but not in Syspro:')
-        for part_num in missing_parts:
-            print(part_num)
+for part in common_parts:
+    qty1_vals = sheet1.loc[col1 == part, 'Quantity per'].values
+    qty2_vals = sheet2.loc[col2 == part, 'Quantity per'].values
+    if len(qty1_vals) > 0 and len(qty2_vals) > 0 and qty1_vals[0] != qty2_vals[0]:
+        qty_mismatches.append((part, qty1_vals[0], qty2_vals[0]))
+
+# Loop to show results until user chooses to exit
+while True:
+    print("\nHere is what is missing from BOM 1:")
+    if diff1:
+        for part_num in sorted(diff1):
+            print(f"  - {part_num}")
+    else:
+        print("  Everything on BOM 1 is on BOM 2.")
+
+    print("\nHere is what is missing from BOM 2:")
+    if diff2:
+        for part_num in sorted(diff2):
+            print(f"  - {part_num}")
+    else:
+        print("  Everything on BOM 2 is on BOM 1.")
+
+    print("\nHere are parts with mismatched quantities:")
+    if qty_mismatches:
+        for part, q1, q2 in qty_mismatches:
+            print(f"  - {part}: BOM1 = {q1}, BOM2 = {q2}")
+    else:
+        print("  All common parts have matching quantities.")
+
+    leave = input("\nPress 1 to exit or any other key to view the results again: ")
+    if leave == "1":
+        break
